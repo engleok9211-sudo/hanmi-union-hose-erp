@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한미유니온호스 통합관리시스템 — 사용자 매뉴얼</title>
+<style>
+  :root {
+    --bg: #F1F5F9;
+    --surface: #FFFFFF;
+    --text: #0F172A;
+    --sub: #475569;
+    --border: #CBD5E1;
+    --sales: #1D4ED8;
+    --sales-soft: #EFF6FF;
+    --purch: #C2410C;
+    --purch-soft: #FFF7ED;
+    --base: #0F766E;
+    --base-soft: #F0FDFA;
+    --green: #15803D;
+    --font: 'Pretendard', 'Malgun Gothic', '맑은 고딕', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 14.5px;
+    padding: 28px 16px 60px;
+  }
+  .manual-wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+  .top-banner {
+    background: #0F172A;
+    color: #fff;
+    padding: 28px 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    border-bottom: 4px solid #2563EB;
+  }
+  .top-banner h1 { font-size: 24px; font-weight: 900; letter-spacing: -0.02em; }
+  .top-banner p { font-size: 13.5px; color: #94A3B8; margin-top: 4px; }
+  .btn-print {
+    background: #2563EB;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-print:hover { background: #1D4ED8; }
+  .content { padding: 32px 36px; }
+  .sec { margin-bottom: 36px; page-break-inside: avoid; }
+  .sec-title {
+    font-size: 19px;
+    font-weight: 900;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #0F172A;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .flow-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .flow-bar-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .flow-step {
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: #F8FAFC;
+  }
+  .flow-step strong { display: block; font-size: 15px; margin-bottom: 4px; }
+  .flow-step span { font-size: 13px; color: var(--sub); }
+  .step-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    background: #fff;
+  }
+  .step-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+  .step-card ol, .step-card ul { padding-left: 20px; }
+  .step-card li { margin-bottom: 5px; }
+  .tip-box {
+    background: #FEFCE8;
+    border: 1.5px solid #FDE047;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    margin-top: 10px;
+  }
+  table.m-tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 8px; }
+  table.m-tbl th, table.m-tbl td { border: 1px solid var(--border); padding: 9px 12px; text-align: left; }
+  table.m-tbl th { background: #F1F5F9; font-weight: 800; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .b-sales { background: var(--sales-soft); color: var(--sales); border: 1px solid #93C5FD; }
+  .b-purch { background: var(--purch-soft); color: var(--purch); border: 1px solid #FDBA74; }
+  .b-base { background: var(--base-soft); color: var(--base); border: 1px solid #5EEAD4; }
+
+  @media print {
+    body { background: #fff; padding: 0; font-size: 12.5px; }
+    .manual-wrap { box-shadow: none; border: none; max-width: 100%; }
+    .no-print { display: none !important; }
+    .top-banner { background: #fff; color: #000; border-bottom: 2px solid #000; padding: 12px 0; }
+    .top-banner p { color: #333; }
+    .content { padding: 16px 0; }
+  }
+</style>
+</head>
+<body>
+<div class="manual-wrap">
+  <div class="top-banner">
+    <div>
+      <h1>📘 한미유니온호스 통합관리시스템 사용자 매뉴얼</h1>
+      <p>매출(견적·거래명세서·입금·외상매출금) · 매입(입고·상환·외상매입금) · 기초등록 실무 가이드</p>
+    </div>
+    <div class="no-print" style="display:flex;gap:8px;">
+      <button class="btn-print" onclick="window.print()">🖨️ 매뉴얼 A4 인쇄</button>
+      <a class="btn-print" style="background:#334155;" href="./한미유니온호스_통합관리시스템.html">🔙 ERP 시스템으로 돌아가기</a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- 1. 접속 및 실행 방법 -->
+    <div class="sec">
+      <div class="sec-title">1. 시스템 실행 및 접속 방법</div>
+      <table class="m-tbl">
+        <thead>
+          <tr>
+            <th style="width:180px;">접속 구분</th>
+            <th>실행 방법 및 주소</th>
+            <th>특징</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>💻 사무실 메인 PC</strong></td>
+            <td>폴더 내 <strong><code>한미유니온호스_ERP실행.bat</code></strong> 더블클릭<br>또는 브라우저 주소창에 <strong><code>http://127.0.0.1:8765/</code></strong> 입력</td>
+            <td>입력·수정한 모든 내역이 PC 내부 데이터베이스(<code>hanmi_erp.db</code>)에 실시간 자동 저장됩니다.</td>
+          </tr>
+          <tr>
+            <td><strong>📱 사내 와이파이 접속</strong><br>(타 PC · 태블릿 · 휴대폰)</td>
+            <td>같은 공유기(와이파이)에 연결된 기기에서<br><strong><code>http://192.168.45.40:8765/</code></strong> 접속</td>
+            <td>메인 PC와 동일한 데이터를 실시간으로 함께 조회·입력할 수 있습니다.</td>
+          </tr>
+          <tr>
+            <td><strong>🌐 외부 인터넷 접속</strong><br>(출장지 · 외부 확인용)</td>
+            <td><strong><a href="https://engleok9211-sudo.github.io/hanmi-union-hose-erp/" target="_blank">https://engleok9211-sudo.github.io/hanmi-union-hose-erp/</a></strong></td>
+            <td>인터넷이 되는 곳 어디서나 접속하여 조회·인쇄·엑셀 다운로드가 가능합니다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 2. 전체 화면 구조 -->
+    <div class="sec">
+      <div class="sec-title">2. 상단 3대 메뉴 한눈에 보기</div>
+      <p style="margin-bottom:10px;">화면 상단에는 크게 <strong>3개의 대분류 버튼</strong>이 있으며, 클릭한 영역의 작업 화면만 큼직하게 표시됩니다.</p>
+      <div class="flow-bar-3">
+        <div class="flow-step" style="background:var(--sales-soft);border-color:#93C5FD;">
+          <strong style="color:var(--sales);">🔵 매출 관리 (받을 돈)</strong>
+          <span>① 견적서 입력·출력<br>② 거래명세서 입력·출력(계산서 체크)<br>③ 입금 등록<br>④ 거래처원장 · 외상매출금 관리</span>
+        </div>
+        <div class="flow-step" style="background:var(--purch-soft);border-color:#FDBA74;">
+          <strong style="color:var(--purch);">🟠 매입 관리 (줄 돈)</strong>
+          <span>① 매입(입고) 등록<br>② 상환 등록 (출금)<br>③ 외상매입금 관리 (매입원장)</span>
+        </div>
+        <div class="flow-step" style="background:var(--base-soft);border-color:#5EEAD4;">
+          <strong style="color:var(--base);">⚙️ 기초 등록 (거래처·품목)</strong>
+          <span>① 거래처 등록 (매출처·매입처)<br>② 품목 · 단가 등록 (매출단가·매입원가)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 매출 관리 프로세스 -->
+    <div class="sec">
+      <div class="sec-title">3. 🔵 매출 관리 따라하기 (견적서 ➔ 거래명세서 ➔ 입금 ➔ 외상매출금)</div>
+      <div class="flow-bar">
+        <div class="flow-step"><strong>STEP 1. 견적서</strong><span>견적 작성 · A4 인쇄 · 명세서로 원클릭 전환</span></div>
+        <div class="flow-step"><strong>STEP 2. 거래명세서</strong><span>명세서 작성 · A4 인쇄 · 세금계산서 발행 체크</span></div>
+        <div class="flow-step"><strong>STEP 3. 입금 등록</strong><span>거래처 수금 입력 (전액/백만원 버튼)</span></div>
+        <div class="flow-step"><strong>STEP 4. 외상매출금·원장</strong><span>거래처별 미수금 확인 및 전체 잔액 인쇄</span></div>
+      </div>
+
+      <div class="step-card">
+        <h3><span class="badge b-sales">① 견적서 입력 · 출력</span> 견적서를 작성하고 거래명세서로 전환하기</h3>
+        <ol>
+          <li><strong>견적 거래처 선택</strong>: 거래처를 선택합니다. (없는 거래처는 우측 상단 <strong><code>[+ 거래처 추가]</code></strong> 버튼으로 즉시 등록)</li>
+          <li><strong>품목 입력</strong>: <strong><code>⚡ 등록품목 빠른선택</code></strong>에서 고르거나 직접 품목명·규격·수량·단가를 입력합니다.</li>
+          <li><strong>견적서 인쇄</strong>: 우측 미리보기 화면에서 <strong><code>[🖨️ 바로 인쇄 (A4)]</code></strong> 버튼을 누르면 정식 견적서가 출력됩니다.</li>
+          <li><strong>거래명세서로 전환</strong>: <strong><code>[➡️ 견적 저장 후 거래명세서로 바로 전환]</code></strong> 버튼(또는 하단 목록의 <strong><code>[➡️ 거래명세서 발급]</code></strong>)을 누르면 동일한 내용으로 거래명세서가 자동 생성되고 거래처원장에 즉시 반영됩니다.</li>
+        </ol>
+      </div>
+
+      <div class="step-card">
+        <h3><span class="badge b-sales">② 거래명세서 입력 · 출력</span> 명세서 발급 및 세금계산서 발행 체크</h3>
+        <ol>
+          <li><strong>거래명세서 직접 작성</strong>: 견적서 없이 바로 명세서를 작성할 때도 거래처와 품목을 선택한 뒤 <strong><code>[💾 거래명세서 저장]</code></strong>을 누르면 즉시 저장 및 거래처원장에 반영됩니다.</li>
+          <li><strong>A4 거래명세서 출력</strong>: 우측에 <strong>공급자 보관용 + 공급받는자 보관용 (A4 2매 양식)</strong>이 자동 생성되며 <strong><code>[🖨️ 바로 인쇄 (A4)]</code></strong>로 출력합니다.</li>
+          <li><strong>세금계산서 발행여부 체크</strong>: 별도의 복잡한 발행 화면 없이, 입력 폼이나 하단 명세서 목록(또는 거래처원장)에서 <strong><code>[✓ 발행완료]</code> 체크박스만 클릭</strong>하면 즉시 발행 여부가 기록됩니다.</li>
+        </ol>
+      </div>
+
+      <div class="step-card">
+        <h3><span class="badge b-sales">③ 입금 등록</span> & <span class="badge b-sales">④ 거래처원장 · 외상매출금 관리</span></h3>
+        <ol>
+          <li><strong>입금 등록</strong>: 거래처를 선택하면 <strong>현재 받을 외상매출금 잔액</strong>이 크게 표시됩니다. <strong><code>[전액 입금]</code></strong> 또는 입금액을 입력하고 <strong><code>[💾 입금 내역 저장]</code></strong>을 누르면 미수금이 즉시 차감됩니다.</li>
+          <li><strong>거래처별 상세 원장 확인</strong>: <code>④ 거래처원장 · 외상매출금 관리</code> 좌측 표에서 거래처를 클릭하면 우측에 해당 거래처의 일자별 매출·입금·잔액 내역이 나타나며, 방금 입력한 거래처는 <strong><code>[방금입력]</code></strong> 배지와 함께 최상단에 고정됩니다.</li>
+          <li><strong>외상매출금 전체 거래처 잔액 인쇄</strong>: 좌측 상단 <strong><code>[🖨️ 외상매출금 전체 잔액 인쇄]</code></strong> 버튼을 누르면 전체 거래처의 미수금 집계표가 A4 양식으로 인쇄됩니다. (<code>[미수금만]</code> 체크 시 미수금이 남아 있는 거래처만 인쇄)</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- 4. 매입 관리 프로세스 -->
+    <div class="sec">
+      <div class="sec-title">4. 🟠 매입 관리 따라하기 (입고 등록 ➔ 상환 등록 ➔ 외상매입금 관리)</div>
+      <div class="flow-bar-3">
+        <div class="flow-step"><strong>STEP 1. 매입(입고) 등록</strong><span>매입처 자재 입고 등록 및 세금계산서 수취 체크</span></div>
+        <div class="flow-step"><strong>STEP 2. 상환 등록 (출금)</strong><span>매입처 계좌 확인 및 외상대금 송금(출금) 기록</span></div>
+        <div class="flow-step"><strong>STEP 3. 외상매입금·원장</strong><span>매입처별 미지급 잔액 확인 및 전체 잔액 인쇄</span></div>
+      </div>
+
+      <div class="step-card">
+        <h3><span class="badge b-purch">① 매입(입고) 등록</span> ➔ <span class="badge b-purch">② 상환 등록</span> ➔ <span class="badge b-purch">③ 외상매입금 관리</span></h3>
+        <ol>
+          <li><strong>매입(입고) 등록</strong>: 매입처(<code>유로텍</code>, <code>마누리코리아</code>, <code>광일유압카프링</code> 등)를 선택하고 입고된 호스·금구·부품 내역을 입력한 뒤 <strong><code>[💾 매입(입고) 저장]</code></strong>을 누릅니다. 세금계산서를 받았는지 여부도 체크박스로 간단히 체크합니다.</li>
+          <li><strong>외상매입금 상환(출금) 등록</strong>: 매입처를 선택하면 <strong>현재 줄 외상매입금 잔액</strong>과 <strong>입금할 은행 계좌번호</strong>가 자동 표시됩니다. 송금 후 <strong><code>[전액 상환]</code></strong> 또는 상환금액을 입력해 저장합니다.</li>
+          <li><strong>외상매입금 전체 거래처 잔액 인쇄</strong>: <code>③ 외상매입금 관리</code> 좌측 상단의 <strong><code>[🖨️ 외상매입금 전체 잔액 인쇄]</code></strong> 버튼을 클릭하면 모든 매입처의 기초이월·당기입고·당기상환·미지급잔액 및 계좌번호가 A4 보고서로 출력됩니다.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- 5. 기초 등록 및 자주 묻는 질문 -->
+    <div class="sec">
+      <div class="sec-title">5. ⚙️ 기초 등록 및 실무 꿀팁</div>
+      <div class="step-card">
+        <h3><span class="badge b-base">기초 등록</span> 거래처 및 품목·단가 추가 방법 (2가지 방법 모두 지원)</h3>
+        <ul>
+          <li><strong>방법 1 (작업 중 즉시 추가)</strong>: 견적서·거래명세서·매입입고 화면 우측 상단의 <strong><code>[+ 거래처 추가]</code></strong>, <strong><code>[+ 품목·단가 추가]</code></strong> 버튼을 누르면 작성하던 화면을 벗어나지 않고 팝업창에서 바로 추가할 수 있습니다.</li>
+          <li><strong>방법 2 (기초 등록 메뉴에서 일괄 관리)</strong>: 상단 <strong><code>⚙️ 기초 등록</code></strong> 탭에서 전체 매출거래처·매입거래처와 품목별 단가를 검색·수정·삭제할 수 있습니다.</li>
+        </ul>
+        <div class="tip-box">
+          💡 <strong>자동 품목 등록 기능</strong>: 견적서나 거래명세서 작성 시 목록에 없는 새로운 품목명과 단가를 직접 입력하여 저장하면, 다음번부터 선택할 수 있도록 해당 거래처의 품목 마스터에 <strong>자동으로 추가 등록</strong>됩니다.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

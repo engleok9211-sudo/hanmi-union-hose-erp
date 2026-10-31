@@ -2486,12 +2486,10 @@ function printAllSalesArBalances() {
 
 function exportAllSalesArBalancesCsv() {
   const rows = getFilteredSalesArRows();
-  let csv = '﻿순번,거래처명,대표자,연락처,기초이월미수,당기매출액,당기입금액,외상매출금잔액,세금계산서발행
-';
+  let csv = '﻿순번,거래처명,대표자,연락처,기초이월미수,당기매출액,당기입금액,외상매출금잔액,세금계산서발행\n';
   rows.forEach(({ c, stat }, idx) => {
     const taxStr = stat.stmtCnt > 0 ? `${stat.taxDone}/${stat.stmtCnt}건` : '-';
-    csv += `${idx + 1},"${(c.name || '').replace(/"/g, '""')}","${(c.ceo || '').replace(/"/g, '""')}","${(c.phone || c.tel || '')}",${stat.open},${stat.sales},${stat.paid},${stat.balance},"${taxStr}"
-`;
+    csv += `${idx + 1},"${(c.name || '').replace(/"/g, '""')}","${(c.ceo || '').replace(/"/g, '""')}","${(c.phone || c.tel || '')}",${stat.open},${stat.sales},${stat.paid},${stat.balance},"${taxStr}"\n`;
   });
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
@@ -3022,11 +3020,9 @@ function printAllPurchApBalances() {
 
 function exportAllPurchApBalancesCsv() {
   const rows = getFilteredPurchApRows();
-  let csv = '﻿순번,매입처명,연락처,입금계좌,기초이월미지급,당기매입액,당기상환액,외상매입금잔액
-';
+  let csv = '﻿순번,매입처명,연락처,입금계좌,기초이월미지급,당기매입액,당기상환액,외상매입금잔액\n';
   rows.forEach(({ v, stat }, idx) => {
-    csv += `${idx + 1},"${(v.name || '').replace(/"/g, '""')}","${(v.phone || v.tel || '')}","${(v.bankInfo || '').replace(/"/g, '""')}",${stat.open},${stat.purch},${stat.paid},${stat.balance}
-`;
+    csv += `${idx + 1},"${(v.name || '').replace(/"/g, '""')}","${(v.phone || v.tel || '')}","${(v.bankInfo || '').replace(/"/g, '""')}",${stat.open},${stat.purch},${stat.paid},${stat.balance}\n`;
   });
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const a = document.createElement('a');

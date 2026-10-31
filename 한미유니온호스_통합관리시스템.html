@@ -408,17 +408,26 @@
   }
 
   /* 인쇄 전용 스타일 */
+  #print-area { display: none; }
   @media print {
-    body * { visibility: hidden; }
-    #print-area, #print-area * { visibility: visible; }
+    @page { size: A4 portrait; margin: 12mm; }
+    body { background: #fff !important; color: #000 !important; }
+    .app-header, .main-nav, .main-container, #toast, #quick-modal-backdrop { display: none !important; }
     #print-area {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      padding: 0;
-      margin: 0;
+      display: block !important;
+      width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
     }
+    #print-area .table-wrap {
+      max-height: none !important;
+      overflow: visible !important;
+      border: none !important;
+    }
+    #print-area table { width: 100% !important; border-collapse: collapse !important; page-break-inside: auto; }
+    #print-area tr { page-break-inside: avoid; page-break-after: auto; }
+    #print-area thead { display: table-header-group; }
+    #print-area tfoot { display: table-footer-group; }
   }
 </style>
 </head>
@@ -866,12 +875,14 @@
       <!-- 좌측: 거래처별 외상매출금 현황 -->
       <div class="card">
         <div class="card-head">
-          <div class="card-title">📊 거래처별 외상매출금 현황 (클릭 시 우측에 상세원장 표시)</div>
-          <div style="display:flex;gap:8px;align-items:center;">
+          <div class="card-title">📊 외상매출금 전체 거래처원장 잔액 현황</div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
             <label style="font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;">
-              <input type="checkbox" id="ar-only-unpaid" onchange="renderSalesArTable()"> 미수금 있는 곳만
+              <input type="checkbox" id="ar-only-unpaid" onchange="renderSalesArTable()"> 미수금만
             </label>
-            <input type="text" id="ar-search" placeholder="거래처 검색..." style="height:32px;width:140px;font-size:13px;" oninput="renderSalesArTable()">
+            <input type="text" id="ar-search" placeholder="거래처 검색..." style="height:32px;width:120px;font-size:13px;" oninput="renderSalesArTable()">
+            <button type="button" class="btn btn-sm btn-sales" onclick="printAllSalesArBalances()">🖨️ 외상매출금 전체 잔액 인쇄</button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="exportAllSalesArBalancesCsv()">📥 전체잔액 엑셀</button>
           </div>
         </div>
         <div class="card-body" style="padding:0;">
@@ -1156,7 +1167,15 @@
       <!-- 좌측: 매입처별 외상매입금 현황 -->
       <div class="card">
         <div class="card-head">
-          <div class="card-title">📊 거래처별 외상매입금 현황 (클릭 시 우측에 매입원장 표시)</div>
+          <div class="card-title">📊 외상매입금 전체 거래처원장 잔액 현황</div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <label style="font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;">
+              <input type="checkbox" id="ap-only-unpaid" onchange="renderPurchApTable()"> 미지급만
+            </label>
+            <input type="text" id="ap-search" placeholder="매입처 검색..." style="height:32px;width:120px;font-size:13px;" oninput="renderPurchApTable()">
+            <button type="button" class="btn btn-sm btn-purch" onclick="printAllPurchApBalances()">🖨️ 외상매입금 전체 잔액 인쇄</button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="exportAllPurchApBalancesCsv()">📥 전체잔액 엑셀</button>
+          </div>
         </div>
         <div class="card-body" style="padding:0;">
           <div class="table-wrap">
@@ -2345,17 +2364,140 @@ function renderSelectedSalesLedger() {
 }
 
 function printSalesLedger() {
-  const { customer } = buildCustomerLedgerEntries(SELECTED_AR_CUST_ID);
-  if (!customer) return;
   const tblHtml = document.getElementById('ar-detail-tbody').parentElement.outerHTML;
   const printArea = document.getElementById('print-area');
+  let title = '[한미유니온호스] 전체 거래처 최근 매출원장 내역';
+  if (SELECTED_AR_CUST_ID && SELECTED_AR_CUST_ID !== 'ALL') {
+    const { customer } = buildCustomerLedgerEntries(SELECTED_AR_CUST_ID);
+    if (customer) title = `[한미유니온호스] 매출 거래처원장 — ${customer.name}`;
+  }
   printArea.innerHTML = `
     <div class="stmt-paper">
-      <h2 style="margin-bottom:10px;">[한미유니온호스] 매출 거래처원장 — ${esc(customer.name)}</h2>
+      <h2 style="margin-bottom:6px;">${esc(title)}</h2>
+      <div style="font-size:12px;color:#475569;margin-bottom:12px;">출력일자: ${new Date().toISOString().slice(0, 10)} | 공급자: 한미유니온호스 (299-11-02230, TEL 02-2671-5772)</div>
       ${tblHtml}
     </div>
   `;
   window.print();
+}
+
+function getFilteredSalesArRows() {
+  const onlyEl = document.getElementById('ar-only-unpaid');
+  const onlyUnpaid = onlyEl ? onlyEl.checked : false;
+  const qEl = document.getElementById('ar-search');
+  const q = ((qEl && qEl.value) || '').trim().toLowerCase();
+  const rows = [];
+  (STATE.customers || []).forEach(c => {
+    const stat = calcCustomerAr(c.id);
+    if (onlyUnpaid && stat.balance <= 0) return;
+    if (q && !(c.name || '').toLowerCase().includes(q)) return;
+    if (stat.open !== 0 || stat.sales > 0 || stat.paid > 0 || stat.balance !== 0 || !onlyUnpaid) {
+      rows.push({ c, stat });
+    }
+  });
+  rows.sort((a, b) => b.stat.balance - a.stat.balance || b.stat.sales - a.stat.sales);
+  return rows;
+}
+
+function printAllSalesArBalances() {
+  const rows = getFilteredSalesArRows();
+  const co = STATE.companyInfo || {};
+  const today = new Date().toISOString().slice(0, 10);
+  let sumOpen = 0, sumSales = 0, sumPaid = 0, sumBal = 0;
+  const trs = rows.map(({ c, stat }, idx) => {
+    sumOpen += stat.open;
+    sumSales += stat.sales;
+    sumPaid += stat.paid;
+    sumBal += stat.balance;
+    const taxStr = stat.stmtCnt > 0 ? `${stat.taxDone}/${stat.stmtCnt}건` : '-';
+    return `
+      <tr>
+        <td class="c num">${idx + 1}</td>
+        <td style="font-weight:800;">${esc(c.name)}</td>
+        <td>${esc(c.ceo || '-')}</td>
+        <td class="num">${esc(c.phone || c.tel || '-')}</td>
+        <td class="r num">${numVal(stat.open)}</td>
+        <td class="r num">${numVal(stat.sales)}</td>
+        <td class="r num">${numVal(stat.paid)}</td>
+        <td class="r num" style="font-weight:900;color:${stat.balance > 0 ? '#B91C1C' : '#0F172A'};">${numVal(stat.balance)}</td>
+        <td class="c">${taxStr}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const printArea = document.getElementById('print-area');
+  printArea.innerHTML = `
+    <div class="stmt-paper" style="border:none;padding:0;">
+      <div style="text-align:center;font-size:22px;font-weight:900;letter-spacing:0.12em;margin-bottom:6px;">
+        외상매출금 전체 거래처원장 잔액표
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #0F172A;">
+        <div><strong>회사명:</strong> ${esc(co.name || '한미유니온호스')} (대표: ${esc(co.ceo || '신우철')} / 사업자: ${esc(co.bizNo || '299-11-02230')})</div>
+        <div><strong>기준일자:</strong> ${today} | <strong>대상 거래처:</strong> ${rows.length}곳</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+        <div style="border:1px solid #334155;padding:8px 10px;background:#F8FAFC;">
+          <div style="font-size:11.5px;color:#475569;font-weight:700;">기초 이월미수 합계</div>
+          <div class="num" style="font-size:15px;font-weight:900;">${fmt(sumOpen)}</div>
+        </div>
+        <div style="border:1px solid #334155;padding:8px 10px;background:#F8FAFC;">
+          <div style="font-size:11.5px;color:#475569;font-weight:700;">당기 총 매출액</div>
+          <div class="num" style="font-size:15px;font-weight:900;">${fmt(sumSales)}</div>
+        </div>
+        <div style="border:1px solid #334155;padding:8px 10px;background:#F8FAFC;">
+          <div style="font-size:11.5px;color:#475569;font-weight:700;">당기 총 입금액(수금)</div>
+          <div class="num" style="font-size:15px;font-weight:900;color:#15803D;">${fmt(sumPaid)}</div>
+        </div>
+        <div style="border:2px solid #1D4ED8;padding:8px 10px;background:#EFF6FF;">
+          <div style="font-size:11.5px;color:#1D4ED8;font-weight:800;">외상매출금 총 잔액(받을 돈)</div>
+          <div class="num" style="font-size:16px;font-weight:900;color:#B91C1C;">${fmt(sumBal)}</div>
+        </div>
+      </div>
+      <table class="stmt-tbl">
+        <thead>
+          <tr>
+            <th style="width:36px;">No</th>
+            <th>거래처명</th>
+            <th style="width:75px;">대표자</th>
+            <th style="width:105px;">연락처</th>
+            <th style="width:95px;">기초이월</th>
+            <th style="width:105px;">당기매출액</th>
+            <th style="width:105px;">당기입금액</th>
+            <th style="width:115px;">외상매출 잔액</th>
+            <th style="width:70px;">계산서</th>
+          </tr>
+        </thead>
+        <tbody>${trs}</tbody>
+        <tfoot>
+          <tr style="background:#F1F5F9;font-weight:900;font-size:13px;">
+            <td colspan="4" class="c">합 계 (${rows.length}개 거래처)</td>
+            <td class="r num">${numVal(sumOpen)}</td>
+            <td class="r num">${numVal(sumSales)}</td>
+            <td class="r num">${numVal(sumPaid)}</td>
+            <td class="r num" style="color:#B91C1C;">${numVal(sumBal)}</td>
+            <td class="c">-</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  `;
+  window.print();
+}
+
+function exportAllSalesArBalancesCsv() {
+  const rows = getFilteredSalesArRows();
+  let csv = '﻿순번,거래처명,대표자,연락처,기초이월미수,당기매출액,당기입금액,외상매출금잔액,세금계산서발행
+';
+  rows.forEach(({ c, stat }, idx) => {
+    const taxStr = stat.stmtCnt > 0 ? `${stat.taxDone}/${stat.stmtCnt}건` : '-';
+    csv += `${idx + 1},"${(c.name || '').replace(/"/g, '""')}","${(c.ceo || '').replace(/"/g, '""')}","${(c.phone || c.tel || '')}",${stat.open},${stat.sales},${stat.paid},${stat.balance},"${taxStr}"
+`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `외상매출금_전체거래처원장잔액_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
 }
 
 function exportSalesLedgerCsv() {
@@ -2640,17 +2782,31 @@ function deletePurchasePayment(id) {
 // =====================================================================
 // [매입 3] 외상매입금 관리 (매입처별 현황 + 우측 매입원장)
 // =====================================================================
+function getFilteredPurchApRows() {
+  const onlyEl = document.getElementById('ap-only-unpaid');
+  const onlyUnpaid = onlyEl ? onlyEl.checked : false;
+  const qEl = document.getElementById('ap-search');
+  const q = ((qEl && qEl.value) || '').trim().toLowerCase();
+  const rows = [];
+  (STATE.vendors || []).forEach(v => {
+    const stat = calcVendorAp(v.id);
+    if (onlyUnpaid && stat.balance <= 0) return;
+    if (q && !(v.name || '').toLowerCase().includes(q)) return;
+    rows.push({ v, stat });
+  });
+  rows.sort((a, b) => b.stat.balance - a.stat.balance || b.stat.purch - a.stat.purch);
+  return rows;
+}
+
 function renderPurchApTable() {
   let totPurch = 0, totPaid = 0, totBal = 0;
-  const rows = [];
   (STATE.vendors || []).forEach(v => {
     const stat = calcVendorAp(v.id);
     totPurch += stat.purch;
     totPaid += stat.paid;
     totBal += stat.balance;
-    rows.push({ v, stat });
   });
-  rows.sort((a, b) => b.stat.balance - a.stat.balance);
+  const rows = getFilteredPurchApRows();
 
   document.getElementById('ap-tot-purch').textContent = fmt(totPurch);
   document.getElementById('ap-tot-paid').textContent = fmt(totPaid);
@@ -2775,11 +2931,108 @@ function printPurchLedger() {
   const printArea = document.getElementById('print-area');
   printArea.innerHTML = `
     <div class="stmt-paper">
-      <h2 style="margin-bottom:10px;">[한미유니온호스] 매입처 원장 — ${esc(vendor.name)}</h2>
+      <h2 style="margin-bottom:6px;">[한미유니온호스] 매입처 상세원장 — ${esc(vendor.name)}</h2>
+      <div style="font-size:12px;color:#475569;margin-bottom:12px;">출력일자: ${new Date().toISOString().slice(0, 10)} | 결제계좌: ${esc(vendor.bankInfo || '-')}</div>
       ${tblHtml}
     </div>
   `;
   window.print();
+}
+
+function printAllPurchApBalances() {
+  const rows = getFilteredPurchApRows();
+  const co = STATE.companyInfo || {};
+  const today = new Date().toISOString().slice(0, 10);
+  let sumOpen = 0, sumPurch = 0, sumPaid = 0, sumBal = 0;
+  const trs = rows.map(({ v, stat }, idx) => {
+    sumOpen += stat.open;
+    sumPurch += stat.purch;
+    sumPaid += stat.paid;
+    sumBal += stat.balance;
+    return `
+      <tr>
+        <td class="c num">${idx + 1}</td>
+        <td style="font-weight:800;">${esc(v.name)}</td>
+        <td class="num">${esc(v.phone || v.tel || '-')}</td>
+        <td style="font-size:11.5px;">${esc(v.bankInfo || '-')}</td>
+        <td class="r num">${numVal(stat.open)}</td>
+        <td class="r num">${numVal(stat.purch)}</td>
+        <td class="r num">${numVal(stat.paid)}</td>
+        <td class="r num" style="font-weight:900;color:${stat.balance > 0 ? '#C2410C' : '#0F172A'};">${numVal(stat.balance)}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const printArea = document.getElementById('print-area');
+  printArea.innerHTML = `
+    <div class="stmt-paper" style="border:none;padding:0;">
+      <div style="text-align:center;font-size:22px;font-weight:900;letter-spacing:0.12em;margin-bottom:6px;">
+        외상매입금 전체 거래처원장 잔액표
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #0F172A;">
+        <div><strong>회사명:</strong> ${esc(co.name || '한미유니온호스')} (대표: ${esc(co.ceo || '신우철')} / 사업자: ${esc(co.bizNo || '299-11-02230')})</div>
+        <div><strong>기준일자:</strong> ${today} | <strong>대상 매입처:</strong> ${rows.length}곳</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+        <div style="border:1px solid #334155;padding:8px 10px;background:#F8FAFC;">
+          <div style="font-size:11.5px;color:#475569;font-weight:700;">기초 이월미지급 합계</div>
+          <div class="num" style="font-size:15px;font-weight:900;">${fmt(sumOpen)}</div>
+        </div>
+        <div style="border:1px solid #334155;padding:8px 10px;background:#F8FAFC;">
+          <div style="font-size:11.5px;color:#475569;font-weight:700;">당기 총 매입(입고)액</div>
+          <div class="num" style="font-size:15px;font-weight:900;">${fmt(sumPurch)}</div>
+        </div>
+        <div style="border:1px solid #334155;padding:8px 10px;background:#F8FAFC;">
+          <div style="font-size:11.5px;color:#475569;font-weight:700;">당기 총 상환(출금)액</div>
+          <div class="num" style="font-size:15px;font-weight:900;color:#15803D;">${fmt(sumPaid)}</div>
+        </div>
+        <div style="border:2px solid #C2410C;padding:8px 10px;background:#FFF7ED;">
+          <div style="font-size:11.5px;color:#C2410C;font-weight:800;">외상매입금 총 잔액(줄 돈)</div>
+          <div class="num" style="font-size:16px;font-weight:900;color:#C2410C;">${fmt(sumBal)}</div>
+        </div>
+      </div>
+      <table class="stmt-tbl">
+        <thead>
+          <tr>
+            <th style="width:36px;">No</th>
+            <th>매입처명</th>
+            <th style="width:105px;">연락처</th>
+            <th>입금계좌 정보</th>
+            <th style="width:95px;">기초이월</th>
+            <th style="width:105px;">당기매입(입고)</th>
+            <th style="width:105px;">당기상환(출금)</th>
+            <th style="width:115px;">외상매입 잔액</th>
+          </tr>
+        </thead>
+        <tbody>${trs}</tbody>
+        <tfoot>
+          <tr style="background:#F1F5F9;font-weight:900;font-size:13px;">
+            <td colspan="4" class="c">합 계 (${rows.length}개 매입처)</td>
+            <td class="r num">${numVal(sumOpen)}</td>
+            <td class="r num">${numVal(sumPurch)}</td>
+            <td class="r num">${numVal(sumPaid)}</td>
+            <td class="r num" style="color:#C2410C;">${numVal(sumBal)}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  `;
+  window.print();
+}
+
+function exportAllPurchApBalancesCsv() {
+  const rows = getFilteredPurchApRows();
+  let csv = '﻿순번,매입처명,연락처,입금계좌,기초이월미지급,당기매입액,당기상환액,외상매입금잔액
+';
+  rows.forEach(({ v, stat }, idx) => {
+    csv += `${idx + 1},"${(v.name || '').replace(/"/g, '""')}","${(v.phone || v.tel || '')}","${(v.bankInfo || '').replace(/"/g, '""')}",${stat.open},${stat.purch},${stat.paid},${stat.balance}
+`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `외상매입금_전체거래처원장잔액_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
 }
 
 function exportPurchLedgerCsv() {
